@@ -1,0 +1,207 @@
+import React, { Component } from 'react';
+import { AppRegistry, Text, View, TouchableHighlight, Dimensions, StyleSheet, Image, ScrollView } from 'react-native';
+import Constants from 'expo-constants';
+
+let deviceHeight = Dimensions.get('window').height;
+let deviceWidth = Dimensions.get('window').width;
+
+export default class App extends Component {
+    state = {
+        moneyPageDisplay: 'block',
+        upgradesPageDisplay: 'none',
+        totalPageDisplay: 'none',
+        totalValuation: 0  // Add state variable to track total valuation
+    }
+
+    handleBasicPagePress = () => this.setState(state => ({
+        moneyPageDisplay: 'block',
+        upgradesPageDisplay: 'none',
+        totalPageDisplay: 'none',
+    }));
+
+    handleWorkPagePress = () => this.setState(state => ({
+        moneyPageDisplay: 'none',
+        upgradesPageDisplay: 'block',
+        totalPageDisplay: 'none',
+    }));
+
+    handleHobbyPagePress = () => this.setState(state => ({
+        moneyPageDisplay: 'none',
+        upgradesPageDisplay: 'none',
+        totalPageDisplay: 'block',
+    }));
+
+    handleInvestmentPress = () => {
+        // Increment total valuation by $1 when the first investment is pressed
+        this.setState(prevState => ({
+            totalValuation: prevState.totalValuation + 1
+        }));
+    };
+
+    renderUpgradeText = (index) => {
+    const upgradeCost = Math.pow(10, index) * 5;
+    if (this.state.totalValuation >= upgradeCost) {
+        return `Buy Upgrade ${index + 1}`;
+    } else {
+        return `Locked Until $${upgradeCost}`;
+    }
+};
+
+    renderFirstScreenText = (index) => {
+    if (index === 0) {
+        return '$1';
+    } else {
+        const upgradeCost = Math.pow(10, index - 1) * 5;
+        const nextUpgradeCost = Math.pow(10, index) * 5;
+        if (this.state.totalValuation >= nextUpgradeCost) {
+            return `$${nextUpgradeCost}`;
+        } else if (this.state.totalValuation >= upgradeCost * 2) {
+            return `$${upgradeCost}`;
+        } else {
+            return `Locked Until $${upgradeCost * 2}`;
+        }
+    }
+};
+
+    renderSecondScreenText = (index) => {
+        const upgradeCost = Math.pow(10, index) * 5;
+        if (this.state.totalValuation >= upgradeCost) {
+            return `Buy Upgrade ${index + 1}`;
+        } else {
+            return `Locked Until $${upgradeCost}`;
+        }
+    };
+
+    render() {
+    return (
+        <View style={styles.container}>
+            <View style={{ display: this.state.moneyPageDisplay }}>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.title}>
+                        Rich Baby Simulator
+                    </Text>
+                    <Image
+                        source={{ uri: 'https://static.vecteezy.com/system/resources/previews/005/585/521/original/illustration-of-rich-baby-vector.jpg' }}
+                        style={{ height: 180, width: 200, margin: 10 }}
+                    />
+                    <ScrollView style={styles.scrollView}>
+                        <TouchableHighlight
+                            key={0}
+                            style={styles.touchableHighlight}
+                            onPress={this.handleInvestmentPress}
+                        >
+                            <Text>{this.renderFirstScreenText(0)}</Text>
+                        </TouchableHighlight>
+                        {[...Array(9)].map((_, index) => (
+                            <TouchableHighlight
+                                key={index + 1}
+                                style={styles.touchableHighlight}
+                                onPress={this.state.totalValuation >= Math.pow(10, index) * 5 ? this.handleInvestmentPress : null}
+                                disabled={this.state.totalValuation < Math.pow(10, index) * 5}
+                            >
+                                <Text>{this.renderFirstScreenText(index + 1)}</Text>
+                            </TouchableHighlight>
+                        ))}
+                    </ScrollView>
+                </View>
+            </View>
+            <View style={{ display: this.state.upgradesPageDisplay }}>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.title}>
+                        Upgrades
+                    </Text>
+                    <ScrollView style={styles.scrollView}>
+                        {[...Array(10)].map((_, index) => (
+                            <TouchableHighlight
+                                key={index}
+                                style={styles.touchableHighlight}
+                            >
+                                <Text>{this.renderUpgradeText(index)}</Text>
+                            </TouchableHighlight>
+                        ))}
+                    </ScrollView>
+                </View>
+            </View>
+            <View style={{ display: this.state.totalPageDisplay }}>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.title}>
+                        Total Wealth
+                    </Text>
+                    <Text style={styles.navButtonText}>
+                        Total Valuation: ${this.state.totalValuation}
+                    </Text>
+                </View>
+            </View>
+            <View style={styles.navbarContainer}>
+                <TouchableHighlight style={styles.navButton} onPress={this.handleBasicPagePress}>
+                    <Text style={styles.navButtonText}>Money</Text>
+                </TouchableHighlight>
+                <TouchableHighlight style={styles.navButton} onPress={this.handleWorkPagePress}>
+                    <Text style={styles.navButtonText}>Upgrades</Text>
+                </TouchableHighlight>
+                <TouchableHighlight style={styles.navButton} onPress={this.handleHobbyPagePress}>
+                    <Text style={styles.navButtonText}>Total Wealth</Text>
+                </TouchableHighlight>
+            </View>
+        </View>
+    );
+}
+}
+
+const styles = StyleSheet.create({
+    container: {
+        height: deviceHeight,
+        width: deviceWidth,
+    },
+    contentContainer: {
+        height: 5*(deviceHeight/6),
+        width: deviceWidth,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'tan',
+    },
+    title: {
+        fontSize: deviceHeight/10,
+        textAlign: 'center',
+        fontWeight: 'bold',
+        color: 'black',
+    },
+    navbarContainer: {
+        height: deviceHeight/6,
+        width: deviceWidth,
+        backgroundColor: 'tan',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 10,
+        borderColor: 'white',
+    },
+    navButton: {
+        height: deviceHeight/14,
+        width: deviceWidth/4,
+        backgroundColor: 'white',
+        borderColor: 'lightblue',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 10,
+    },
+    navButtonText: {
+        fontSize: deviceHeight/40,
+        textAlign: 'center',
+        color: 'black',
+        margin: 20
+    },
+    scrollView: {
+        marginVertical: 20,
+        maxHeight: deviceHeight/4,
+        width: deviceWidth,
+    },
+    touchableHighlight: {
+        backgroundColor: 'lightgray',
+        padding: 20,
+        marginVertical: 10,
+        alignItems: 'center',
+    }
+});
+
